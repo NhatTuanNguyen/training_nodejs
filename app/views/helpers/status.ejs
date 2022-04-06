@@ -1,0 +1,13 @@
+<%
+    statusHelper = (linkPrefix,status,id)=>{
+        let xmtlStatus = "";
+        let link =linkPrefix + "changeStatus/" + id +"/" + status;
+        if (status=="active") {
+            xmtlStatus = '<span class="label label-success">active</span>';
+        } else if (status=="inactive") {
+            xmtlStatus = '<span class="label label-warning">inactive</span>'
+        }
+        return `<a href=${link}>${xmtlStatus}</a>`
+    }
+%>
+
