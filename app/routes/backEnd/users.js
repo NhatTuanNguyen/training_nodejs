@@ -17,7 +17,7 @@ let linkIndex = `/${systemConfig.prefixAdmin}/users`;
 const pageTitleIndex = 'Users Management';
 const pageTitleAdd = pageTitleIndex + ' - Add';
 const pageTitleEdit = pageTitleIndex + ' - Edit';
-const folderView = __path_views + 'pages/users/';
+const folderView = __path_views_admin + 'pages/users/';
 uploadAvatar = fileHelper.upload('avatar');
 
 /* GET users listing. */
@@ -136,6 +136,7 @@ router.get('/form(/:id)?', async function (req, res, next) {
 
 // Save
 router.post('/save',
+  // validatorUsers.validator(),
   (req, res, next) => {
     uploadAvatar(req, res, async function (err) {
       const errors = validationResult(req);

@@ -13,7 +13,7 @@ let linkIndex = `/${systemConfig.prefixAdmin}/category`;
 const pageTitleIndex = 'category Management';
 const pageTitleAdd = pageTitleIndex + ' - Add';
 const pageTitleEdit = pageTitleIndex + ' - Edit';
-const folderView = __path_views + 'pages/category/'
+const folderView = __path_views_admin + 'pages/category/'
 
 /* GET users listing. */
 router.get('(/status/:status)?', async (req, res, next) => {

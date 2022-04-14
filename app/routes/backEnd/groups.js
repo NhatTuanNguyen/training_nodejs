@@ -14,7 +14,7 @@ let linkIndex = `/${systemConfig.prefixAdmin}/groups`;
 const pageTitleIndex = 'Groups Management';
 const pageTitleAdd = pageTitleIndex + ' - Add';
 const pageTitleEdit = pageTitleIndex + ' - Edit';
-const folderView = __path_views + 'pages/groups/'
+const folderView = __path_views_admin + 'pages/groups/'
 
 /* GET users listing. */
 router.get('(/status/:status)?', async (req, res, next) => {

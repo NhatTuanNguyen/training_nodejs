@@ -13,7 +13,7 @@ let linkIndex = `/${systemConfig.prefixAdmin}/items`;
 const pageTitleIndex = 'Item Management';
 const pageTitleAdd = pageTitleIndex + ' - Add';
 const pageTitleEdit = pageTitleIndex + ' - Edit';
-const folderView = __path_views + 'pages/items/'
+const folderView = __path_views_admin + 'pages/items/'
 
 /* GET users listing. */
 router.get('(/status/:status)?', async (req, res, next) => {

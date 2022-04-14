@@ -17,6 +17,10 @@ module.exports = {
             .skip((params.paginations.currentPage - 1) * params.paginations.totalItemPerPage)
     },
 
+    listItemsInSelecbox: () => {
+        return Model.find({}, { name: 1, _id: 1 });
+    },
+
     getItems: (id) => {
         return Model.findById(id);
     },

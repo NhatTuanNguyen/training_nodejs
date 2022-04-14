@@ -1,0 +1,7 @@
+<% imgHelper=(folder,imageName,className ='img-avatar',alt = 'photo')=> {
+    if (imageName == null) {
+        imageName = 'noAvatar.png';
+    }
+    return `<img class="${className}" src="${folder+imageName}" alt="${alt}"/>`
+}
+%>
