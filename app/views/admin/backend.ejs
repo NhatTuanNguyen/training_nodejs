@@ -2,18 +2,41 @@
 <html>
 
 <head>
-    <% include ./elements/header.ejs %>
+    <% include ./elements/head %>
 </head>
 
-<body>
-    <div id="wrapper">
-        <% include ./elements/navbar.ejs %>
-        <div id="page-wrapper">
-          <% include ./elements/titlePage.ejs %>
-          <%- body %>
+<body class="hold-transition sidebar-mini layout-fixed text-sm">
+    <div class="wrapper">
+
+        <!-- Navbar -->
+        <% include ./elements/navbar %>
+        <!-- /.navbar -->
+
+        <!-- Main Sidebar Container -->
+        <% include ./elements/sidebar %>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <% include ./elements/page-header %>
+            
+            <!-- /.content-header -->
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+                    <%- body %>
+                </div>
+            </section>
+            <!-- /.content -->
         </div>
+        <!-- /.content-wrapper -->
+        <% include ./elements/footer %>
     </div>
-    <% include ./elements/scripts.ejs %>
+    <!-- ./wrapper -->
+
+    <!-- script -->
+    <% include ./elements/script %>
 </body>
 
 </html>

@@ -1,396 +1,272 @@
 $(document).ready(function () {
+    //check selectbox
+    change_form_action("#zt-form .slbAction", "#zt-form", "#btn-action");
 
-    var ckbAll = $(".cbAll");
-    //check all
-    ckbAll.click(function () {
+    $('#check-all').click(function () {
         $('input:checkbox').not(this).prop('checked', this.checked);
         if ($(this).is(':checked')) {
             $(".ordering").attr("name", "ordering");
-        }else{
+        } else {
+
             $(".ordering").removeAttr("name");
         }
-        
+
     });
 
-    $.widget.bridge('uibutton', $.ui.button);
+    if ($('textarea#content_ck').length) {
+        CKEDITOR.replace('content_ck');
+    }
 
-    // Active Menu
-    activeMenu();
+    function change_form_action(slb_selector, form_selector, id_btn_action) {
 
-    let $btnSearch = $('button#btn-search');
-    let $btnClearSearch = $('button#btn-clear-search');
-    let $inputSearchValue = $('input[name = search_value]');
+        var optValue;
+        var isDelete = false;
+        var pattenCheckDelete = new RegExp("delete", "i");
 
-    var searchParams = new URLSearchParams(window.location.search);
-    let moduleName = searchParams.get('module');
-    let controllerName = searchParams.get('controller');
-    var searchParamsEntries = searchParams.entries();
+        $(slb_selector).on("change", function () {
+            optValue = $(this).val();
 
-    $inputSearchValue.keyup(function (event) {
-        if (event.keyCode === 13) {
-            $btnSearch.click();
-        }
-    });
-
-    // Search Event
-    $btnSearch.click(function () {
-        let searchValue = $inputSearchValue.val().trim();
-        let searchField = $('.select-search-field').val();
-        if (searchValue != '') {
-            let exceptParams = ['search_value', 'search_field', 'page'];
-            let link = createLink(exceptParams);
-            link +=
-                'search_field=' +
-                searchField +
-                '&search_value=' +
-                searchValue.replace(/\s+/g, '+').toLowerCase();
-            window.location.href = link;
-        } else {
-            showToast('warning', 'Nhập nội dung cần tìm kiếm!');
-        }
-    });
-
-    // Clear Search Event
-    $btnClearSearch.click(function () {
-        $inputSearchValue.val('');
-    });
-
-    // Switch GroupACP Change Event
-    $('input.chkGroupACP').each(function () {
-        $(this).change(function () {
-            let checkbox = $(this);
-            let url = $(this).data('url');
-            $.get(
-                url,
-                function (data) {
-                    $('.modified-' + data.id).html(data.modified);
-                    checkbox.data('url', data.link);
-                    showToast('success', 'update');
-                },
-                'json'
-            );
-        });
-    });
-
-    
-
-    // Change group event
-    $('[name="select-group"]').change(function () {
-        $currentSelectGroup = $(this);
-        let groupId = $(this).val();
-        let userId = $(this).data('id');
-        let url = `index.php?module=admin&controller=user&action=ajaxChangeGroup&id=${userId}&group_id=${groupId}`;
-        $.get(
-            url,
-            function (data) {
-                $('.modified-' + data.id).html(data.modified);
-                // showToast('success', 'edit');
-                $currentSelectGroup.notify('Cập nhật thành công!', {
-                    className: 'success',
-                    position: 'top center',
-                });
-            },
-            'json'
-        );
-    });
-
-    // Change category event
-    $('[name="select-category"]').change(function () {
-        $slbCategory = $(this);
-        let categoryId = $(this).val();
-        let bookId = $(this).data('id');
-        let url = `index.php?module=admin&controller=book&action=ajaxChangeCategory&id=${bookId}&category_id=${categoryId}`;
-        $.get(url, function (data) {
-            if (data > 0) {
-                $slbCategory.notify('Cập nhật thành công!', {
-                    className: 'success',
-                    position: 'top center',
-                });
+            if (optValue !== "") {
+                $(id_btn_action).removeAttr('disabled');
+            } else {
+                $(id_btn_action).attr('disabled', 'disabled');
             }
+            $(form_selector).attr("action", optValue);
         });
-    });
 
-    // Change ordering event
-    $('.chkOrdering').change(function () {
-        $chkOrdering = $(this);
-        let ordering = $(this).val();
-        let id = $(this).data('id');
-        let url = `index.php?module=${moduleName}&controller=${controllerName}&action=ajaxOrdering&id=${id}&ordering=${ordering}`;
-
-        $.get(url, function (data) {
-            if (data > 0) {
-                $chkOrdering.notify('Cập nhật thành công!', {
-                    className: 'success',
-                    position: 'top center',
-                });
+        $(form_selector + " .btnAction").on("click", function () {
+            isDelete = pattenCheckDelete.test($(slb_selector).val());
+            if (isDelete) {
+                var confirmDelete = confirm('Are you really want to delete?');
+                if (confirmDelete === false) {
+                    return;
+                }
             }
-        });
-    });
 
-    // Check all for bulk action
-    $('#check-all').change(function () {
-        var checkStatus = this.checked;
-        $('#form-table input[name="checkbox[]"]').each(function () {
-            this.checked = checkStatus;
-        });
-        showSelectedRowInBulkAction();
-    });
+            var numberOfChecked = $(form_selector + ' input[name="cid"]:checked').length;
+            if (numberOfChecked == 0) {
+                alert("Please choose some items");
+                return;
+            } else {
+                var flag = false;
+                var str = $(slb_selector + " option:selected").attr('data-comfirm');
 
-    $('#form-table input[name="checkbox[]"]').change(function () {
-        showSelectedRowInBulkAction();
-    });
+                if (str != undefined) {
 
-    // Bulk Action
-    $('#bulk-apply').click(function () {
-        var action = $('#bulk-action').val();
-        var checkbox = $('#form-table input[name="checkbox[]"]:checked');
-        let lstID = [];
-        checkbox.each(function () {
-            lstID.push($(this).val());
-        });
-        if (checkbox.length > 0) {
-            switch (action) {
-                case 'multi-delete':
-                    Swal.fire(
-                        confirmObj(
-                            'Bạn chắc chắn muốn xóa các dòng dữ liệu đã chọn?',
-                            'error',
-                            'Xóa'
-                        )
-                    ).then((result) => {
-                        if (result.value) {
-                            $('#form-table').attr(
-                                'action',
-                                `index.php?module=${moduleName}&controller=${controllerName}&action=delete`
-                            );
-                            $('#form-table').submit();
-                        }
-                    });
-                    break;
-                case 'multi-ordering':
-                    Swal.fire(
-                        confirmObj('Cập nhật các dòng dữ liệu đã chọn?', 'info', 'Cập nhật')
-                    ).then((result) => {
-                        if (result.value) {
-                            $('#form-table .chkOrdering').each(function () {
-                                if (!lstID.includes($(this).data('id').toString())) {
-                                    $(this).attr('disabled', true);
-                                }
-                            });
-                            $('#form-table').attr(
-                                'action',
-                                `index.php?module=${moduleName}&controller=${controllerName}&action=ordering`
-                            );
-                            $('#form-table').submit();
-                        }
-                    });
-                    break;
-                case 'multi-active':
-                    Swal.fire(
-                        confirmObj('Cập nhật các dòng dữ liệu đã chọn?', 'info', 'Cập nhật')
-                    ).then((result) => {
-                        if (result.value) {
-                            $('#form-table').attr(
-                                'action',
-                                `index.php?module=${moduleName}&controller=${controllerName}&action=active`
-                            );
-                            $('#form-table').submit();
-                        }
-                    });
-                    break;
-                case 'multi-inactive':
-                    Swal.fire(
-                        confirmObj('Cập nhật các dòng dữ liệu đã chọn?', 'info', 'Cập nhật')
-                    ).then((result) => {
-                        if (result.value) {
-                            $('#form-table').attr(
-                                'action',
-                                `index.php?module=${moduleName}&controller=${controllerName}&action=inactive`
-                            );
-                            $('#form-table').submit();
-                        }
-                    });
-                    break;
-                default:
-                    showToast('warning', 'bulk-action-not-selected-action');
-                    break;
+                    //Kiểm tra giá trị trả về khi user nhấn nút trên popup
+                    flag = confirm(str);
+                    if (flag == false) {
+                        return flag;
+                    } else {
+                        $(form_selector).submit();
+                    }
+
+                } else {
+                    if (optValue != undefined) {
+                        $(form_selector).submit();
+                    }
+                }
             }
-        } else {
-            showToast('warning', 'bulk-action-not-selected-row');
-        }
-    });
 
-    // Preview image before upload
-    $('#admin-file-upload').change(function () {
-        filePreview(this);
-    });
-
-    // CKEditor
-    if ($('#editor').length > 0) {
-        ClassicEditor.create(document.querySelector('#editor'), {
-            // plugins: [ CKFinder ],
-            // toolbar: [ 'ckfinder'],
-            ckfinder: {
-                uploadUrl:
-                    'public/template/admin/adminlte/js/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images&responseType=json',
-            },
-        }).catch(function (error) {
-            console.error(error);
         });
     }
 
-    // Filter Group
-    $('[name="filter_group"]').change(function () {
-        let exceptParams = ['page', 'sort_field', 'sort_order', 'filter_group'];
-        let link = createLink(exceptParams);
-        link += `filter_group=${$(this).val()}`;
-        window.location.href = link;
+    // convert to slug
+    const convertToSlug = function (str) {
+        let slug
+
+        //Đổi chữ hoa thành chữ thường
+        slug = str.toLowerCase()
+
+        //Đổi ký tự có dấu thành không dấu
+        slug = slug.replace(/á|à|ả|ạ|ã|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ/gi, 'a')
+        slug = slug.replace(/é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ/gi, 'e')
+        slug = slug.replace(/i|í|ì|ỉ|ĩ|ị/gi, 'i')
+        slug = slug.replace(/ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ/gi, 'o')
+        slug = slug.replace(/ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự/gi, 'u')
+        slug = slug.replace(/ý|ỳ|ỷ|ỹ|ỵ/gi, 'y')
+        slug = slug.replace(/đ/gi, 'd')
+        //Xóa các ký tự đặt biệt
+        slug = slug.replace(/\`|\~|\!|\@|\#|\||\$|\%|\^|\&|\*|\(|\)|\+|\=|\,|\.|\/|\?|\>|\<|\'|\"|\:|\|_/gi, '')
+        //Đổi khoảng trắng thành ký tự gạch ngang
+        slug = slug.replace(/ /gi, "-")
+        //Đổi nhiều ký tự gạch ngang liên tiếp thành 1 ký tự gạch ngang
+        //Phòng trường hợp người nhập vào quá nhiều ký tự trắng
+        slug = slug.replace(/\-\-\-\-\-/gi, '-')
+        slug = slug.replace(/\-\-\-\-/gi, '-')
+        slug = slug.replace(/\-\-\-/gi, '-')
+        slug = slug.replace(/\-\-/gi, '-')
+        //Xóa các ký tự gạch ngang ở đầu và cuối
+        slug = '@' + slug + '@'
+        slug = slug.replace(/\@\-|\-\@|\@/gi, '')
+        //In slug ra textbox có id “slug”
+        return slug;
+    }
+
+    $('#name_slug').keyup(function () {
+        var Text = $(this).val();
+        Text = convertToSlug(Text);
+        $('input[name="slug"]').val(Text);
     });
 
-    // Filter Special
-    $('[name="filter_special"]').change(function () {
-        let exceptParams = ['page', 'sort_field', 'sort_order', 'filter_special'];
-        let link = createLink(exceptParams);
-        link += `filter_special=${$(this).val()}`;
-        window.location.href = link;
+    $('select[name="group_id"]').change(function () {
+        $('input[name="group_name"]').val($(this).find('option:selected').text());
     });
 
-    // Filter Category
-    $('[name="filter_category"]').change(function () {
-        let exceptParams = ['page', 'sort_field', 'sort_order', 'filter_category'];
-        let link = createLink(exceptParams);
-        link += `filter_category=${$(this).val()}`;
-        window.location.href = link;
+    $('select[name="category_id"]').change(function () {
+        $('input[name="category_name"]').val($(this).find('option:selected').text());
     });
 
-    // Filter is home
-    $('[name="filter_ishome"]').change(function () {
-        let exceptParams = ['page', 'sort_field', 'sort_order', 'filter_ishome'];
-        let link = createLink(exceptParams);
-        link += `filter_ishome=${$(this).val()}`;
-        window.location.href = link;
+    $('select[name="filter_group"]').change(function () {
+        var path = window.location.pathname.split('/');
+        var linkRedirect = '/' + path[1] + '/' + path[2] + '/filter-group/' + $(this).val();
+        window.location.pathname = linkRedirect;
     });
 
-    
 });
 
 
+var menuLv2 = document.getElementsByClassName("categoryLv2");
+var current = document.getElementsByClassName("active");
 
-const Toast = Swal.mixin({
-    toast: true,
-    position: 'top-end',
-    showConfirmButton: false,
-    timerProgressBar: true,
-    timer: 5000,
-    padding: '1rem',
-});
 
-function activeMenu() {
-    let pathname = window.location.pathname;
-    let arrMenu = pathname.split("/");
-    let currentMenu = arrMenu[2];
-    $('li.nav-item a[data-active="'+currentMenu+'"]').addClass('my-active');
+
+for (var i = 0; i < menuLv2.length; i++) {
+    menuLv2[i].addEventListener("click", function () {
+        var parent = document.getElementsByClassName("menu-open");
+
+        parent = parent[0].getElementsByClassName('categoryLv1');
+        // var parent = this.closest('.nav-item');
+        // console.log(parent);
+        if (current.length > 0) {
+            // for (let i = 0; i <= current.length; i++) {
+            // current[0].classList.remove("active");
+            current[1].classList.remove("active");
+            // }
+            this.className += " active";
+            // parent[0].className += " active";
+        } else {
+            this.className += " active";
+            parent[0].className += " active";
+        }
+        console.log(parent);
+    });
 }
 
-function confirmObj(text, icon, confirmText) {
-    return {
-        position: 'top',
-        title: 'Thông báo!',
-        text: text,
-        icon: icon,
+const alerDelete = (test) => {
+    const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'btn btn-danger'
+        },
+        buttonsStyling: false
+    })
+
+    swalWithBootstrapButtons.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: confirmText,
-        cancelButtonText: 'Hủy',
-    };
+        cancelButtonText: 'No, cancel!',
+        confirmButtonText: 'Yes, delete it!',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.value) {
+            swalWithBootstrapButtons.fire(
+                'Deleted!',
+                'Your file has been deleted.',
+                'success'
+            );
+            $.ajax({
+                type: "GET",
+                url: test,
+                data: "data",
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                }
+            });
+
+        } else if (
+            /* Read more about handling dismissals below */
+            result.dismiss === Swal.DismissReason.cancel
+        ) {
+            swalWithBootstrapButtons.fire(
+                'Cancelled',
+                'Your imaginary file is safe :)',
+                'error'
+            )
+        }
+    })
+
 }
 
-function deleteItem(id) {
-    Swal.fire(confirmObj('Bạn chắc chắn muốn xóa dòng dữ liệu này?', 'error', 'Xóa')).then(
-        (result) => {
-            if (result.value) {
-                let searchParams = new URLSearchParams(window.location.search);
-                let moduleName = searchParams.get('module');
-                let controllerName = searchParams.get('controller');
-                window.location.href = `index.php?module=${moduleName}&controller=${controllerName}&action=delete&id=${id}`;
+// kiểm tra số lượng đã checked và action lựa chọn
+var checkCount = 0;
+var textSelect = 'Bulk Action'
+$(".custom-control-input").change(function () {
+    if($('#check-all:checkbox:checked').length == 0) {
+        checkCount = $('input:checkbox:checked').length;
+    } else {
+        checkCount = $('input:checkbox:checked').length - 1;
+    }
+    $(".countItems").text(checkCount);;
+});
+
+$(".slbAction").change(function () {
+    textSelect = $(".slbAction option:selected").text();
+});
+
+const applyAction = (link) => {
+    console.log(textSelect);
+    if (checkCount && textSelect !== 'Bulk Action') {
+        $.ajax({
+            type: "POST",
+            url: link,
+            data: "data",
+            dataType: "json",
+            success: function (response) {
+                console.log(response);
             }
-        }
-    );
-}
-
-function sortList(field, order) {
-    // http://php01.test/mvc-multi/index.php?module=admin&controller=group&action=index&filter_status=active&search=a&sort_field=name&sort_order=desc
-    $('input[name="sort_field"]').val(field);
-    $('input[name="sort_order"]').val(order);
-
-    let exceptParams = ['page', 'sort_field', 'sort_order'];
-    let link = createLink(exceptParams);
-
-    link += `sort_field=${field}&sort_order=${order}`;
-    window.location.href = link;
-
-    // $('#form-table').submit();
-}
-
-function submitForm(link) {
-    $('#admin-form').attr('action', link);
-    $('#admin-form').submit();
-}
-
-function createLink(exceptParams) {
-    let pathname = window.location.pathname;
-    let searchParams = new URLSearchParams(window.location.search);
-    let searchParamsEntries = searchParams.entries();
-
-    let link = pathname + '?';
-    for (let pair of searchParamsEntries) {
-        if (exceptParams.indexOf(pair[0]) == -1) {
-            link += `${pair[0]}=${pair[1]}&`;
-        }
-    }
-    return link;
-}
-
-function showToast(type, action) {
-    let message = '';
-    switch (action) {
-        case 'update':
-            message = 'Cập nhật thành công!';
-            break;
-        case 'bulk-action-not-selected-action':
-            message = 'Vui lòng chọn action cần thực hiện!';
-            break;
-        case 'bulk-action-not-selected-row':
-            message = 'Vui lòng chọn ít nhất 1 dòng dữ liệu!';
-            break;
+        });
+    } else {
+        Swal.fire({
+            toast: true,
+            icon: 'error',
+            title: 'action unselected or unchecked items',
+            animation: true,
+            position: 'top-right',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+        });
     }
 
-    Toast.fire({
-        icon: type,
-        title: ' ' + message,
+}
+
+const changeOrdering = (element) => {
+    const id = element.getAttribute('data-id');
+    const link = element.getAttribute('data-link');
+    const value = element.value;
+    // console.log(element.value);
+    $.ajax({
+        type: "POST",
+        url: link,
+        data: { id, value },
+        dataType: "json",
+        success: function (response) {
+            Swal.fire({
+                toast: true,
+                icon: 'success',
+                title: response,
+                animation: true,
+                position: 'top-right',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+        }
     });
 }
 
-function filePreview(input) {
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            $('#admin-preview-image').css('display', 'block');
-            $('#admin-preview-image').attr('src', e.target.result);
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
 
-function showSelectedRowInBulkAction() {
-    let checkbox = $('#form-table input[name="checkbox[]"]:checked');
-    let navbarBadge = $('#bulk-apply .navbar-badge');
-    if (checkbox.length > 0) {
-        navbarBadge.html(checkbox.length);
-        navbarBadge.css('display', 'inline');
-    } else {
-        navbarBadge.html('');
-        navbarBadge.css('display', 'none');
-    }
-}

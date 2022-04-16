@@ -1,13 +1,20 @@
-<%
-    statusHelper = (linkPrefix,status,id)=>{
-        let xmtlStatus = "";
-        let link =linkPrefix + "changeStatus/" + id +"/" + status;
-        if (status=="active") {
-            xmtlStatus = '<span class="label label-success">active</span>';
-        } else if (status=="inactive") {
-            xmtlStatus = '<span class="label label-warning">inactive</span>'
+<% 
+    statusHelper = (collection, status, id) => {
+        let xhtmlStatus = '';
+        let icon = '';
+        let link       = systemConfig.prefixAdmin + '/' + collection + '/changeStatus/' + id + '/' + status ;
+        if(status === "active") {
+            xhtmlStatus = 'btn-success';
+            icon = '<i class="fas fa-check"></i>';
+        }else if (status === "inactive") {
+            xhtmlStatus = 'btn-danger';
+            icon = '<i class="fas fa-minus"></i>';
         }
-        return `<a href=${link}>${xmtlStatus}</a>`
+
+        return `<a href="${link}" class="rounded-circle btn btn-sm ${xhtmlStatus}">${icon}</a>`;
     }
 %>
+
+
+
 

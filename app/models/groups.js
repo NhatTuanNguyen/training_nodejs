@@ -108,6 +108,7 @@ module.exports = {
                 status: item.status,
                 ordering: parseInt(item.ordering),
                 content: item.content,
+                group_acp:item.group_acp,
                 modified: {
                     user_id: 0,
                     user_name: 'admin',

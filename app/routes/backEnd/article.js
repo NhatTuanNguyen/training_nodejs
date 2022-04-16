@@ -136,7 +136,7 @@ router.get('/form(/:id)?', async function (req, res, next) {
 
 // Save
 router.post('/save',
-  validatorArticle.validator(),
+  // validatorArticle.validator(),
   (req, res, next) => {
     uploadThumb(req, res, async function (err) {
       const errors = validationResult(req);

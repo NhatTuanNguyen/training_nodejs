@@ -1,16 +1,16 @@
 <% sortHelper=(linkPrefix,name,sortField,currentSortField,currentSortType,options)=> {
     let order = (currentSortType === 'asc') ? 'desc' : 'asc';
     let link = `${linkPrefix}sort/` + sortField + '/' + order;
-    let icon = '<i class="fa fa-fw fa-sort"></i>';
+    let icon = '<i class="fas fa-sort"></i>';
     let style = (options !== undefined) ? `style="${options}"`: `style="color: black;text-decoration: none"`
 
     if (sortField == currentSortField) {
-        icon = `<i class="fa fa-fw fa-sort-${currentSortType}"></i>`;
+        icon = (currentSortType === 'asc') ? '<i class="fas fa-sort-amount-down"></i>' : '<i class="fas fa-sort-amount-up"></i>'
     }
 
     return `<th class="text-center pointer" ${style}>
         <a href="${link}" class="title_col" style="color: black;text-decoration: none;">
-            ${name}${icon}
+            ${name} ${icon}
         </a>
     </th>`;
     }

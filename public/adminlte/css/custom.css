@@ -1,5 +1,5 @@
 body {
-    font-family: 'Helvetica Neue', Roboto, 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+    font-family: 'Helvetica Neue', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
         'Segoe UI', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 }
 
@@ -63,4 +63,15 @@ a.my-active {
 
 span.highlight {
     background-color: #e5f421;
+}
+
+.img-avatar {
+    vertical-align: middle;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+  }
+
+.img-avatar-form {
+    width:70px
 }

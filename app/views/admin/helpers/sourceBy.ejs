@@ -1,6 +1,6 @@
 <% 
 sourceByHelper = (username,time) => {
-    return `<span class="glyphicon glyphicon-user" aria-hidden="true"></span>${username}<br>
-    <span class="glyphicon glyphicon-time" aria-hidden="true"></span>${moment(time).format(systemConfig.formatLongTime)}<br>`;
+    return `<i class="fas fa-user"></i> ${username}<br>
+    <i class="fas fa-clock"></i> ${moment(time).format(systemConfig.formatLongTime)}`;
 }
 %>
